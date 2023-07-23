@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Order Management</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+  <h1>Order Management System</h1>
+  <button id="refresh-button">Refresh List</button>
+  <!-- CREATE FORM -->
+  <form id="create-form">
+    <h2>Create New Order</h2>
+    <label for="customer_id">Customer ID:</label>
+    <input type="text" name="customer_id" required><br>
+    <label for="order_date">Order Date:</label>
+    <input type="text" name="order_date" required><br>
+    <label for="total_amount">Total Amount:</label>
+    <input type="text" name="total_amount" required><br>
+    <button type="submit">Create Order</button>
+  </form>
+
+  <!-- READ TABLE -->
+  <h2>Order List</h2>
+  <table id="order-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer ID</th>
+        <th>Order Date</th>
+        <th>Total Amount</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <script>
+    $(document).ready(() => {
+      
+
+      // Create form submit event
+      $('#create-form').submit((event) => {
+        event.preventDefault();
+        const formData = $('#create-form').serialize();
+        createOrder(formData);
+      });
+
+      // Edit button click event
+      $(document).on('click', '.edit-button', function() {
+        const orderId = $(this).data('order-id');
+        const customerId = $(this).data('customer-id');
+        const orderDate = $(this).data('order-date');
+        const totalAmount = $(this).data('total-amount');
+        showEditForm(orderId, customerId, orderDate, totalAmount);
+      });
+
+      // Delete button click event
+      $(document).on('click', '.delete-button', function() {
+        const orderId = $(this).data('order-id');
+        deleteOrder(orderId);
+      });
+    });
+
+    // Create - Add a new order
+    function createOrder(formData) {
+      $.ajax({
+        type: 'POST',
+        url: '/orders',
+        data: formData,
+        success: (response) => {
+          alert(response);
+          $('#create-form')[0].reset();
+          loadOrders();
+        },
+        error: (error) => {
+          console.log(error);
+        }
+      });
+    }
+
+    // Read - Get list of all orders
+    function loadOrders() {
+      $.ajax({
+        type: 'GET',
+        url: '/orders123',
+        success: (response) => {
+          const tableBody = $('#order-table tbody');
+          tableBody.empty();
+          console.log(response)
+          response.forEach((order) => {
+            const row = `<tr>
+                          <td>${order.order_id}</td>
+                          <td>${order.customer_id}</td>
+                          <td>${order.order_date.substring(0, 10)}</td>
+                          <td>${order.total_amount}</td>
+                          <td>
+                            <button class="edit-button" data-order-id="${order.order_id}" data-customer-id="${order.customer_id}" data-order-date="${order.order_date.substring(0, 10)}" data-total-amount="${order.total_amount}">Edit</button>
+                            <button class="delete-button" data-order-id="${order.order_id}">Delete</button>
+                          </td>
+                        </tr>`;
+            tableBody.append(row);
+          });
+        },
+        error: (error) => {
+          console.log(error);
+        }
+      });
+    }
+
+    // Update - Update an existing order
+    function updateOrder(orderId, formData) {
+      $.ajax({
+        type: 'PUT',
+        url: `/orders/${orderId}`,
+        data: formData,
+        success: (response) => {
+          alert(response);
+          loadOrders();
+        },
+        error: (error) => {
+          console.log(error);
+        }
+      });
+    }
+
+    // Replace - Replace an existing order
+    function replaceOrder(orderId, formData) {
+      $.ajax({
+        type: 'PATCH',
+        url: `/orders/${orderId}`,
+        data: formData,
+        success: (response) => {
+          alert(response);
+          loadOrders();
+        },
+        error: (error) => {
+          console.log(error);
+        }
+      });
+    }
+
+    // Delete - Delete an existing order
+    function deleteOrder(orderId) {
+      const confirmDelete = confirm('Are you sure you want to delete this order?');
+      if (confirmDelete) {
+        $.ajax({
+          type: 'DELETE',
+          url: `/orders/${orderId}`,
+          success: (response) => {
+            alert(response);
+            loadOrders();
+          },
+          error: (error) => {
+            console.log(error);
+          }
+        });
+      }
+    }
+
+    // Show edit form
+    function showEditForm(orderId, customerId, orderDate, totalAmount) {
+      const newCustomerId = prompt('Enter new customer ID:', customerId);
+      const newOrderDate = prompt('Enter new order date:', orderDate);
+      const newTotalAmount = prompt('Enter new total amount:', totalAmount);
+      const formData = {
+        customer_id: newCustomerId,
+        order_date: newOrderDate,
+        total_amount: newTotalAmount
+      };
+      
+      const confirmReplace = confirm('Do you want to replace the order?');
+      if (confirmReplace) {
+        replaceOrder(orderId, formData);
+      } else {
+        updateOrder(orderId, formData);
+      }
+    }
+
+    // Load orders on page load
+      loadOrders();
+
+      // Refresh button click event
+      $('#refresh-button').click(() => {
+        loadOrders();
+      });
+  </script>
+</body>
+</html>
