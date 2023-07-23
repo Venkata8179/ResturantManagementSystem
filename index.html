@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Management</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Restaurant Data Management System</h1>
+    <a href="customers.html" ><button>Customers</button></a>
+    <a href="MenuItems.html" ><button>Menuitems</button></a>
+    <a href="orders.html" ><button>Orderdetails</button></a>
+    <a href="orderitems.html" ><button>Orderitems</button></a>
+
+    <h2>Menu Items with Order Items</h2>
+    <button id="menu-items-button">Get Menu Items</button>
+    <table id="menu-items-table">
+      <thead>
+        <tr>
+          <th>Item ID</th>
+          <th>Item Name</th>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody id="menu-items-body">
+        <!-- Menu items with order items will be added dynamically here -->
+      </tbody>
+    </table>
+  
+    <h2>Customers with Orders</h2>
+    <button id="customers-button">Get Customers</button>
+    <table id="customers-table">
+      <thead>
+        <tr>
+          <th>Customer ID</th>
+          <th>Customer Name</th>
+          <th>Phone Number</th>
+          <th>Email</th>
+          <th>Order ID</th>
+          <th>Order Date</th>
+          <th>Total Amount</th>
+        </tr>
+      </thead>
+      <tbody id="customers-body">
+        <!-- Customers with orders will be added dynamically here -->
+      </tbody>
+    </table>
+  
+    <h2>Orders with Order Items</h2>
+    <button id="orders-button">Get Orders</button>
+    <table id="orders-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer ID</th>
+          <th>Order Date</th>
+          <th>Total Amount</th>
+          <th>Order Item ID</th>
+          <th>Item ID</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody id="orders-body">
+        <!-- Orders with order items will be added dynamically here -->
+      </tbody>
+    </table>
+  
+    <h2>Orders with Customers and Order Items</h2>
+    <button id="orders-customers-items-button">Get Orders with Customers and Order Items</button>
+    <table id="orders-customers-items-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer Name</th>
+          <th>Order Date</th>
+          <th>Total Amount</th>
+          <th>Order Item ID</th>
+          <th>Item Name</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody id="orders-customers-items-body">
+        <!-- Orders with customers and order items will be added dynamically here -->
+      </tbody>
+    </table>
+  
+    <script>
+      // Function to populate the table with data
+      function populateTable(data, tableId, bodyId) {
+        var table = $('#' + tableId);
+        var tbody = $('#' + bodyId);
+        tbody.empty();
+  
+        $.each(data, function(index, item) {
+          var row = $('<tr>');
+          $.each(item, function(key, value) {
+            var cell = $('<td>').text(value);
+            row.append(cell);
+          });
+          tbody.append(row);
+        });
+  
+        table.show();
+      }
+  
+      // Function to handle button clicks and fetch data
+      function fetchData(url, tableId, bodyId) {
+        $.get(url, function(data) {
+          populateTable(data, tableId, bodyId);
+        });
+      }
+  
+      // Add event listeners to buttons
+      $('#menu-items-button').click(function() {
+        fetchData('/menuitems-with-orderitems', 'menu-items-table', 'menu-items-body');
+      });
+  
+      $('#customers-button').click(function() {
+        fetchData('/customers-with-orders', 'customers-table', 'customers-body');
+      });
+  
+      $('#orders-button').click(function() {
+        fetchData('/orders-with-orderitems', 'orders-table', 'orders-body');
+      });
+  
+      $('#orders-customers-items-button').click(function() {
+        fetchData('/orders-with-customers-and-orderitems', 'orders-customers-items-table', 'orders-customers-items-body');
+      });
+    </script>
+  </body>
+</html>
