@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Menu Management</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+  <h1>Menu Management System</h1>
+  <button id="refresh-button">Refresh List</button>
+  <!-- CREATE FORM -->
+  <form id="create-form">
+    <h2>Add New Menu Item</h2>
+    <label for="item_name">Item Name:</label>
+    <input type="text" name="item_name" required><br>
+    <label for="description">Description:</label>
+    <input type="text" name="description" required><br>
+    <label for="price">Price:</label>
+    <input type="text" name="price" required><br>
+    <button type="submit">Add Menu Item</button>
+  </form>
+
+  <!-- READ TABLE -->
+  <h2>Menu Item List</h2>
+  <table id="menu-item-table">
+    <thead>
+      <tr>
+        <th>Item ID</th>
+        <th>Item Name</th>
+        <th>Description</th>
+        <th>Price</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <script>
+    // CREATE - add a new menu item to the database
+    $('#create-form').submit((event) => {
+      event.preventDefault();
+      const formData = $('#create-form').serialize();
+      $.ajax({
+        type: 'POST',
+        url: '/menuitems',
+        data: formData,
+        success: (response) => {
+          alert(response);
+          $('#create-form')[0].reset();
+          loadMenuItems();
+        },
+        error: (error) => {
+          console.log(error);
+        }
+      });
+    });
+
+    // READ - get list of all menu items in the database
+    function loadMenuItems() {
+      $.ajax({
+        type: 'GET',
+        url: '/menuitems',
+        success: (response) => {
+          const tableBody = $('#menu-item-table tbody');
+          tableBody.empty();
+          response.forEach((menuItem) => {
+            const row = `<tr>
+                          <td>${menuItem.item_id}</td>
+                          <td>${menuItem.item_name}</td>
+                          <td>${menuItem.description}</td>
+                          <td>${menuItem.price}</td>
+                          <td>
+                            <button onclick="editMenuItem(${menuItem.item_id},'${menuItem.item_name}','${menuItem.description}','${menuItem.price}')">Edit</button>
+                            <button onclick="deleteMenuItem(${menuItem.item_id})">Delete</button>
+                          </td>
+                        </tr>`;
+            tableBody.append(row);
+          });
+        },
+        error: (error) => {
+          console.log(error);
+        }
+      });
+    }
+
+    // UPDATE - update an existing menu item in the database
+    function editMenuItem(itemId, itemName, description, price) {
+      const newItemName = prompt('Enter new item name:', itemName);
+      const newDescription = prompt('Enter new description:', description);
+      const newPrice = prompt('Enter new price:', price);
+      const formData = { item_name: newItemName, description: newDescription, price: newPrice };
+      $.ajax({
+        type: 'PUT',
+        url: `/menuitems/${itemId}`,
+        data: formData,
+        success: (response) => {
+          alert(response);
+          loadMenuItems();
+        },
+        error: (error) => {
+          console.log(error);
+        }
+      });
+    }
+
+    // DELETE - delete an existing menu item from the database
+    function deleteMenuItem(itemId) {
+      const confirmDelete = confirm('Are you sure you want to delete this menu item?');
+      if (confirmDelete) {
+        $.ajax({
+          type: 'DELETE',
+          url: `/menuitems/${itemId}`,
+          success: (response) => {
+            alert(response);
+            loadMenuItems();
+          },
+          error: (error) => {
+            console.log(error);
+          }
+        });
+      }
+    }
+
+    // load menu items on page load
+    loadMenuItems();
+
+    $('#refresh-button').click(() => {
+      loadMenuItems();
+    });
+  </script>
+</body>
+</html>
